@@ -13,9 +13,21 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+
+from django.conf.urls import url
+from django.contrib import admin
+from rest_framework.urlpatterns import format_suffix_patterns
+from meal import views
+#from user import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    url(r'^admin/', admin.site.urls),
+    path('', include('meal.urls')),
+    path('', include('user.urls'))
+    # url(r'^mealcategory/$', views.MealCategoryList.as_view()),
+    # url(r'^mealcategory/(?P<pk>[0-9]+)/$', views.MealCategoryDetail.as_view()),
+
 ]

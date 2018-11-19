@@ -56,6 +56,7 @@ class Meal(models.Model):
     price = models.IntegerField()
     description = models.TextField(max_length=1500)
 
+
     class Meta:
         verbose_name_plural = 'names'
 
@@ -69,22 +70,23 @@ class Order(models.Model):
     tablename = models.CharField(max_length=250, default='table1')
     isitopen = models.ForeignKey(Status, on_delete=models.CASCADE, related_name='orders')
     date = models.CharField(max_length=300)
-    mealsid = models.ManyToManyField(Meal, through='MealsToOrder', related_name='orders')
-
+    meals = models.ManyToManyField(Meal, through='MealsToOrder')
 
     def __str__(self):
         return "Order #" + str(self.pk) + "," + self.tableid.name + \
                ", Waiter: " + self.waiterid.name + ", " \
-                "Meals: " + str(self.mealsid.name)
+                "Meals: " + str(self.meals.name)
 
 
 class MealsToOrder(models.Model):
     count = models.IntegerField(default=0)
-    orderid = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='mealstoorders')
-    meals = models.ForeignKey(Meal, on_delete=models.CASCADE, null=False, related_name='mealstoorders')
+    orderid = models.ForeignKey(Order, on_delete=models.CASCADE)
+    meals = models.ForeignKey(Meal, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "Waiter: " + self.orderid.waiterid.name + ", Meal: " + self.meals.name
+        return ("id: " + str(self.meals_id) + ' ' +
+               " name: " + self.meals.name + ' ' +
+                " count: " + str(self.count))
 
 
 class Check(models.Model):
@@ -92,7 +94,7 @@ class Check(models.Model):
     date = models.CharField(max_length=300)
     servicefee = models.ForeignKey(ServicePercentage, on_delete=models.CASCADE, related_name='checks')
     totalsum = models.IntegerField(default=0)
-    #meals = models.ManyToManyField(Meal)
+    meals = models.ManyToManyField(Meal)
 
     def __str__(self):
         return "Check #" + str(self.pk)

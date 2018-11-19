@@ -52,12 +52,12 @@ class MealSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    count = MealsToOrder.objects.count
-    mealsid = MealSerializer(many=True)
+    #count = MealsToOrder.objects.count
+    #meals = MealSerializer(many=True)
 
     class Meta:
         model = Order
-        fields = ('id', 'waiterid', 'tableid', 'isitopen', 'date', 'mealsid')
+        fields = ('id', 'waiterid', 'tableid', 'isitopen', 'date', 'meals')
 
 
 class MealsToOrderSerializer(serializers.ModelSerializer):
@@ -69,17 +69,28 @@ class MealsToOrderSerializer(serializers.ModelSerializer):
 
 class CheckSerializer(serializers.ModelSerializer):
     totalsum = serializers.SerializerMethodField()
+    #orderid= OrderSerializer(many=True)
+    meals = serializers.SerializerMethodField()
 
     class Meta:
         model = Check
-        fields = ('id','date','orderid','servicefee', 'totalsum')
+        fields = ('id','date','orderid','servicefee', 'totalsum', 'meals')
 
     def get_totalsum(self, obj):
-        count = MealsToOrder.objects.count
-        #price = obj.orderid.mealsid.all().get_attribute('price')
-        func = obj.orderid.mealsid.all().aggregate(Sum('price'))
-        #print(int(func.get('price__sum')))
-        return int(func.get('price__sum'))
+        summ = 0
+        meal_orders = MealsToOrder.objects.filter(orderid=obj.orderid)
+        for meal_order in meal_orders:
+            summ += meal_order.count * meal_order.meals.price
+        return summ
+
+    def get_meals(self, obj):
+        meal_orders = MealsToOrder.objects.filter(orderid=obj.orderid)
+        #return meal_orders.all().__str__()
+        summ = []
+        for meal_order in meal_orders:
+            summ.append(meal_order.__str__())
+        return summ
+
 
 
 
